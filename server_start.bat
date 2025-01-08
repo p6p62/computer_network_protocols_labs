@@ -1,0 +1,1 @@
+start cmd /C ".venv\Scripts\activate && python messages\server.py"

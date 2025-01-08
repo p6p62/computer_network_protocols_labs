@@ -1,0 +1,1 @@
+start /min cmd /min /C ".venv\Scripts\activate && python messages\client.py"
