@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 
+
 class Logger:
     def __init__(self, log_dir, log_file):
         self.LOG_DIR = log_dir
@@ -13,7 +14,8 @@ class Logger:
             os.makedirs(self.LOG_DIR)
         if not os.path.exists(self.LOG_PATH):
             with open(self.LOG_PATH, 'w') as f:
-                f.write("# Log File Created: " + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "\n")
+                f.write("# Log File Created: " +
+                        datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "\n")
 
     def log(self, message):
         self._ensure_log_file_exists()

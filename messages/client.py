@@ -10,6 +10,8 @@ from PyQt6.QtGui import QColorConstants
 from config import SETTINGS
 from message import Message
 from logger import Logger
+from server_commands import SERVER_COMMANDS
+
 
 class ChatClient(QMainWindow):
     BUFFER_SIZE = SETTINGS["MAX_BUFFER_SIZE"]
@@ -17,18 +19,21 @@ class ChatClient(QMainWindow):
     DISCONNECTED_TEXT = "Нет подключения к серверу"
     CONNECTED_TEXT = "Подключено к серверу"
 
-    def __init__(self, host=SETTINGS['HOST'], port=SETTINGS['PORT']):
+    def __init__(self, username=None, host=SETTINGS['HOST'], port=SETTINGS['PORT']):
         super().__init__()
-        self.logger = Logger(log_dir=SETTINGS["CLIENT_LOG_DIR"], log_file=SETTINGS["CLIENT_LOG_FILE"])
+        self.logger = Logger(log_dir=SETTINGS["CLIENT_LOG_DIR"],
+                             log_file=SETTINGS["CLIENT_LOG_FILE"])
         self.host = host
         self.port = port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.name = None
+        self.name = username
 
         self.init_ui()
 
     def init_ui(self):
         self.setWindowTitle("Чат")
+
+        self.admin_hint = None  # панель команд администратора
 
         self.chat_display = QTextEdit()
         self.chat_display.setReadOnly(True)
@@ -58,8 +63,15 @@ class ChatClient(QMainWindow):
         central_widget = QWidget()
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
-        
+
         self.message_input.setFocus()
+
+    def add_admin_hint(self):
+        if self.admin_hint is None:
+            commands = "\n".join([c.convert_to_string()
+                                 for c in list(SERVER_COMMANDS.values())])
+            admin_hint_label = QLabel(commands)
+            self.centralWidget().layout().addWidget(admin_hint_label)
 
     def fill_username(self, name: str):
         self.username_label.setText(self.name)
@@ -72,7 +84,8 @@ class ChatClient(QMainWindow):
             self.status_label.setText(ChatClient.CONNECTED_TEXT)
             self.log(f"Connected to server ({self.host}:{self.port})")
 
-            self.name = self.get_user_name()
+            if self.name is None:
+                self.name = self.get_user_name()
             self.fill_username(self.name)
             self.log(f"User entered name: {self.name}")
 
@@ -90,7 +103,8 @@ class ChatClient(QMainWindow):
         self.logger.log(log_text)
 
     def get_user_name(self):
-        name, ok = QInputDialog.getText(self, "Ввод имени", "Введи своё имя для чата:")
+        name, ok = QInputDialog.getText(
+            self, "Ввод имени", "Введи своё имя для чата:")
         if ok and name:
             return name
         else:
@@ -99,8 +113,10 @@ class ChatClient(QMainWindow):
     def send_message(self):
         text = self.message_input.text().strip()
         if text:
-            message = Message(msg_type=Message.CHAT_MESSAGE, sender=self.name, text_data=text)
-            self.socket.sendall(message.serialize().encode(ChatClient.ENCODING))
+            message = Message(msg_type=Message.CHAT_MESSAGE,
+                              sender=self.name, text_data=text)
+            self.socket.sendall(
+                message.serialize().encode(ChatClient.ENCODING))
             self.message_input.clear()
             self.log(f"Send message from {self.name}")
 
@@ -129,7 +145,8 @@ class ChatClient(QMainWindow):
     def receive_messages(self):
         while True:
             try:
-                data = self.socket.recv(ChatClient.BUFFER_SIZE).decode(ChatClient.ENCODING)
+                data = self.socket.recv(
+                    ChatClient.BUFFER_SIZE).decode(ChatClient.ENCODING)
                 if not data:
                     break
                 message = Message.deserialize(data)
@@ -149,6 +166,7 @@ class ChatClient(QMainWindow):
         self.log(f"{self.name} disconnect from server")
         self.log(f"{self.name} has closed client")
         event.accept()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

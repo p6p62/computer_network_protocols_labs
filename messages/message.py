@@ -1,5 +1,6 @@
 import time
 
+
 class Message:
     CHAT_MESSAGE = 'C'
     SERVICE_TEXT_MESSAGE = 'S'
@@ -8,7 +9,8 @@ class Message:
     def __init__(self, msg_type, sender=None, timestamp=None, text_data=""):
         self.msg_type = msg_type
         self.sender = sender
-        self.timestamp = timestamp if timestamp is not None else int(time.time())
+        self.timestamp = \
+            timestamp if timestamp is not None else int(time.time())
         self.text_data = text_data
 
     def get_formatted_message_time(self) -> str:
