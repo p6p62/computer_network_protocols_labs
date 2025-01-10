@@ -1,3 +1,8 @@
+"""
+logger.py
+Борис Гладышев, 343М, 2025 год
+"""
+
 import os
 from datetime import datetime
 

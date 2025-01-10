@@ -1,3 +1,8 @@
+"""
+server_commands.py
+Борис Гладышев, 343М, 2025 год
+"""
+
 from typing import Callable
 
 

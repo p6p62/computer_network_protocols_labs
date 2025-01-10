@@ -1,3 +1,8 @@
+"""
+simple_client.py
+Борис Гладышев, 343М, 2025 год
+"""
+
 import socket
 from config import SETTINGS
 
